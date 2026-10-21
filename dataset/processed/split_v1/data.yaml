@@ -1,0 +1,15 @@
+path: C:\Users\91767\Documents\AquaVigil\dataset\processed\split_v1
+train: C:\Users\91767\Documents\AquaVigil\dataset\processed\split_v1\train\images
+val: C:\Users\91767\Documents\AquaVigil\dataset\processed\split_v1\valid\images
+test: C:\Users\91767\Documents\AquaVigil\dataset\processed\split_v1\test\images
+nc: 9
+names:
+- '1'
+- Aeromoniasis
+- branchitis
+- healthy
+- ichthyophthiriasis
+- keratitis
+- lymphocystis
+- object
+- saprolegniasis

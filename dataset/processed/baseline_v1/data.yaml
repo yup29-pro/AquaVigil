@@ -1,0 +1,11 @@
+path: C:\Users\91767\Documents\AquaVigil\dataset\processed\baseline_v1
+train: C:\Users\91767\Documents\AquaVigil\dataset\processed\baseline_v1\train\images
+val: C:\Users\91767\Documents\AquaVigil\dataset\processed\baseline_v1\valid\images
+test: C:\Users\91767\Documents\AquaVigil\dataset\processed\baseline_v1\test\images
+nc: 5
+names:
+- Aeromoniasis
+- branchitis
+- keratitis
+- lymphocystis
+- object

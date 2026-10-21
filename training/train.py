@@ -1,0 +1,138 @@
+#!/usr/bin/env python3
+"""
+training/train.py
+
+Initiates YOLOv8 object detection model training using the Ultralytics Python API.
+Reads hyperparameter and dataset configuration from configs/model_config.yaml.
+
+Usage:
+    python training/train.py
+    python training/train.py --config configs/model_config.yaml --device cpu
+    python training/train.py --config configs/model_config.yaml --device 0
+"""
+
+import argparse
+import sys
+from pathlib import Path
+
+try:
+    import yaml
+except ImportError:
+    yaml = None
+
+try:
+    from ultralytics import YOLO
+except ImportError:
+    YOLO = None
+
+
+def load_yaml(path: Path) -> dict:
+    if yaml is None:
+        raise ImportError("PyYAML is not installed. Run 'pip install PyYAML'.")
+    with open(path, "r", encoding="utf-8") as f:
+        return yaml.safe_load(f)
+
+
+def validate_prerequisites(config: dict) -> tuple[bool, str]:
+    # 1. Ultralytics check
+    if YOLO is None:
+        return False, "Ultralytics is not installed. Install requirements first via 'pip install ultralytics'."
+
+    # 2. Dataset YAML check
+    data_yaml_str = config.get("data", {}).get("yaml_path")
+    if not data_yaml_str:
+        return False, "Configuration missing 'data.yaml_path' field in model_config.yaml."
+
+    data_yaml_path = Path(data_yaml_str)
+    if not data_yaml_path.exists():
+        return False, (
+            f"Dataset configuration YAML does not exist: {data_yaml_path.resolve()}\n"
+            "Please extract the Roboflow dataset into 'dataset/raw/' and ensure 'data.yaml' is present."
+        )
+
+    # 3. Check data.yaml contents
+    try:
+        dataset_meta = load_yaml(data_yaml_path)
+    except Exception as e:
+        return False, f"Failed to parse dataset YAML ({data_yaml_path}): {e}"
+
+    train_path = dataset_meta.get("train")
+    if not train_path:
+        return False, f"Dataset YAML ({data_yaml_path}) does not define a 'train' path."
+
+    val_path = dataset_meta.get("val") or dataset_meta.get("valid")
+    if not val_path:
+        print("[WARNING] Dataset YAML does not specify a validation set ('val'). Training without validation may result in overfitting or evaluation failures.")
+
+    return True, ""
+
+
+def run_training(config_path: Path, device_override: str = None):
+    print("=" * 70)
+    print(" AquaVigil - Model Training")
+    print("=" * 70)
+
+    if not config_path.exists():
+        print(f"[!] Config file not found: {config_path.resolve()}")
+        sys.exit(1)
+
+    config = load_yaml(config_path)
+
+    # Validate prerequisites
+    ok, err_msg = validate_prerequisites(config)
+    if not ok:
+        print(f"\n[!] PREREQUISITE ERROR:\n{err_msg}\n")
+        print("Training cannot start until requirements and dataset are verified.")
+        sys.exit(1)
+
+    model_weights = config.get("model", {}).get("weights", "yolov8n.pt")
+    data_yaml = config.get("data", {}).get("yaml_path")
+    training_args = config.get("training", {})
+    output_args = config.get("output", {})
+
+    device = device_override or training_args.get("device", "cpu")
+
+    print("\nTraining Parameters:")
+    print(f"  Model Weights:   {model_weights}")
+    print(f"  Dataset Config:  {data_yaml}")
+    print(f"  Epochs:          {training_args.get('epochs', 50)}")
+    print(f"  Batch Size:      {training_args.get('batch', 16)}")
+    print(f"  Image Size:      {training_args.get('imgsz', 640)}")
+    print(f"  Target Device:   {device}")
+    print(f"  Output Project:  {output_args.get('project', 'runs/detect')}")
+    print(f"  Run Name:        {output_args.get('name', 'aquavigil_v8_baseline')}\n")
+
+    print("[*] Initializing YOLO model...")
+    model = YOLO(model_weights)
+
+    print("[*] Launching training process...")
+    results = model.train(
+        data=str(Path(data_yaml).resolve()),
+        epochs=training_args.get("epochs", 50),
+        batch=training_args.get("batch", 16),
+        imgsz=training_args.get("imgsz", 640),
+        device=device,
+        workers=training_args.get("workers", 2),
+        seed=training_args.get("seed", 42),
+        project=output_args.get("project", "runs/detect"),
+        name=output_args.get("name", "aquavigil_v8_baseline"),
+        exist_ok=output_args.get("exist_ok", False),
+        save_period=output_args.get("save_period", -1),
+        patience=training_args.get("patience", 15),
+    )
+
+    print("\n[+] Training complete.")
+    print(f"Best weights saved at: {results.save_dir}/weights/best.pt")
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Train AquaVigil YOLOv8 fish disease detection model.")
+    parser.add_argument("--config", type=str, default="configs/model_config.yaml", help="Path to model configuration YAML")
+    parser.add_argument("--device", type=str, default=None, help="Device override ('cpu', '0', '1', etc.)")
+    args = parser.parse_args()
+
+    run_training(Path(args.config), args.device)
+
+
+if __name__ == "__main__":
+    main()

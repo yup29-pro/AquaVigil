@@ -1,0 +1,20 @@
+# AquaVigil Dataset Configuration (Adjusted Relative Paths)
+# Generated from dataset/raw/data.yaml without modifying the original raw file.
+
+# Dataset root directory relative to this config or project root
+path: ../raw
+
+# Split paths relative to 'path'
+train: train/images
+val: train/images    # Fallback pointing to existing images until a vetted validation split is established
+test: train/images   # Fallback pointing to existing images until a vetted test split is established
+
+nc: 9
+names: ['1', 'Aeromoniasis', 'branchitis', 'healthy', 'ichthyophthiriasis', 'keratitis', 'lymphocystis', 'object', 'saprolegniasis']
+
+roboflow:
+  workspace: yashwanth-r
+  project: fish-disease-fqkyc-rh1rk
+  version: 1
+  license: CC BY 4.0
+  url: https://app.roboflow.com/yashwanth-r/fish-disease-fqkyc-rh1rk/1

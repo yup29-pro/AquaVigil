@@ -1,0 +1,67 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environments
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Dataset
+dataset/raw/*
+!dataset/raw/.gitkeep
+!dataset/raw/README.md
+dataset/processed/split_v1/train/
+dataset/processed/split_v1/valid/
+dataset/processed/split_v1/test/
+dataset/processed/baseline_v1/train/
+dataset/processed/baseline_v1/valid/
+dataset/processed/baseline_v1/test/
+!dataset/processed/.gitkeep
+!dataset/processed/*.yaml
+!dataset/processed/*/*.yaml
+!dataset/processed/*/*.csv
+*.zip
+*.tar
+*.tar.gz
+*.7z
+
+# Model weights and checkpoints
+models/*.pt
+models/*.onnx
+models/*.engine
+!models/.gitkeep
+
+# Training runs & logs
+runs/
+!runs/.gitkeep
+
+# Evaluation & prediction outputs
+results/predictions/*
+!results/predictions/.gitkeep
+!results/metrics/.gitkeep
+!results/metrics/*.md
+!results/metrics/*.json
+
+# IDE and OS
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Build artifacts
+dist/
+build/
+*.egg-info/

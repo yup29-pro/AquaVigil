@@ -1,0 +1,28 @@
+# AquaVigil Python Core Dependencies
+#
+# IMPORTANT NOTICE REGARDING PYTORCH INSTALLATION:
+# PyTorch (torch and torchvision) installation differs depending on whether your machine has
+# an NVIDIA GPU with CUDA or CPU-only hardware.
+#
+# If running with NVIDIA CUDA support, install PyTorch matching your CUDA version first
+# from the official PyTorch wheel repository (e.g., https://pytorch.org/get-started/locally/):
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+#
+# For CPU-only environments (default):
+#   pip install torch torchvision
+#
+# After PyTorch is installed or in parallel, install the requirements below:
+
+# Computer Vision & Deep Learning
+ultralytics
+opencv-python
+numpy
+Pillow
+matplotlib
+PyYAML
+
+# Backend & Web API
+fastapi
+uvicorn[standard]
+python-multipart
+pydantic

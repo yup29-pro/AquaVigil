@@ -1,0 +1,30 @@
+# Model & Training Configuration for AquaVigil
+
+# Model Settings
+model:
+  weights: "yolov8n.pt"           # Base model weights to fine-tune (e.g., yolov8n.pt, yolov8s.pt, yolov8m.pt)
+  task: "detect"                 # YOLO task type: 'detect' for 2D bounding boxes
+
+# Dataset Settings
+data:
+  yaml_path: "dataset/raw/data.yaml"  # Path to dataset YAML configuration file
+
+# Training Hyperparameters
+training:
+  imgsz: 640                     # Input image resolution (pixels)
+  epochs: 50                     # Total training epochs (baseline recommendation: 30-50)
+  batch: 16                      # Batch size (reduce to 8 or 4 if CPU / GPU memory is constrained)
+  device: "cpu"                  # Device specification: 'cpu' or '0' (for GPU device 0)
+  workers: 2                     # Dataloader worker count
+  seed: 42                       # Random seed for reproducibility
+  optimizer: "auto"              # Optimizer selection ('auto', 'SGD', 'Adam', 'AdamW')
+  lr0: 0.01                      # Initial learning rate
+  lrf: 0.01                      # Final learning rate fraction (lr0 * lrf)
+  patience: 15                   # Early stopping epoch patience
+
+# Output & Logging Settings
+output:
+  project: "runs/detect"         # Base directory where training runs are saved
+  name: "aquavigil_v8_baseline"  # Subdirectory name for current training run
+  exist_ok: false                # Overwrite existing run directory if true, or auto-increment if false
+  save_period: -1                # Save checkpoint every x epochs (-1 saves only best.pt and last.pt)
