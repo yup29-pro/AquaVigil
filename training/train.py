@@ -67,9 +67,19 @@ def validate_prerequisites(config: dict) -> tuple[bool, str]:
     return True, ""
 
 
-def run_training(config_path: Path, device_override: str = None):
+def resolve_device(device_setting: str) -> str:
+    if device_setting == "auto" or device_setting is None:
+        try:
+            import torch
+            return "0" if torch.cuda.is_available() else "cpu"
+        except Exception:
+            return "cpu"
+    return device_setting
+
+
+def run_training(config_path: Path, device_override: str = None, smoke: bool = False):
     print("=" * 70)
-    print(" AquaVigil - Model Training")
+    print(" AquaVigil - Model Training" + (" [SMOKE TEST]" if smoke else ""))
     print("=" * 70)
 
     if not config_path.exists():
@@ -90,49 +100,65 @@ def run_training(config_path: Path, device_override: str = None):
     training_args = config.get("training", {})
     output_args = config.get("output", {})
 
-    device = device_override or training_args.get("device", "cpu")
+    raw_device = device_override or training_args.get("device", "auto")
+    device = resolve_device(raw_device)
+
+    epochs = 1 if smoke else training_args.get("epochs", 50)
+    fraction = 0.05 if smoke else 1.0
+    run_name = (output_args.get("name", "baseline_v1_yolov8n") + "_smoke") if smoke else output_args.get("name", "baseline_v1_yolov8n")
+    project = output_args.get("project", "runs")
 
     print("\nTraining Parameters:")
     print(f"  Model Weights:   {model_weights}")
     print(f"  Dataset Config:  {data_yaml}")
-    print(f"  Epochs:          {training_args.get('epochs', 50)}")
+    print(f"  Epochs:          {epochs}" + (" (Smoke test: 1 epoch)" if smoke else ""))
+    print(f"  Data Fraction:   {fraction}" + (" (Smoke test: 5% data)" if smoke else ""))
     print(f"  Batch Size:      {training_args.get('batch', 16)}")
     print(f"  Image Size:      {training_args.get('imgsz', 640)}")
-    print(f"  Target Device:   {device}")
-    print(f"  Output Project:  {output_args.get('project', 'runs/detect')}")
-    print(f"  Run Name:        {output_args.get('name', 'aquavigil_v8_baseline')}\n")
+    print(f"  Config Device:   {raw_device} -> Resolved: {device}")
+    print(f"  Output Project:  {project}")
+    print(f"  Run Name:        {run_name}\n")
 
     print("[*] Initializing YOLO model...")
     model = YOLO(model_weights)
 
+    train_kwargs = {
+        "data": str(Path(data_yaml).resolve()),
+        "epochs": epochs,
+        "batch": training_args.get("batch", 16),
+        "imgsz": training_args.get("imgsz", 640),
+        "device": device,
+        "workers": training_args.get("workers", 2),
+        "seed": training_args.get("seed", 42),
+        "project": project,
+        "name": run_name,
+        "exist_ok": True if smoke else output_args.get("exist_ok", False),
+        "save_period": output_args.get("save_period", -1),
+        "patience": training_args.get("patience", 15),
+    }
+
+    if smoke:
+        train_kwargs["fraction"] = 0.05
+
     print("[*] Launching training process...")
-    results = model.train(
-        data=str(Path(data_yaml).resolve()),
-        epochs=training_args.get("epochs", 50),
-        batch=training_args.get("batch", 16),
-        imgsz=training_args.get("imgsz", 640),
-        device=device,
-        workers=training_args.get("workers", 2),
-        seed=training_args.get("seed", 42),
-        project=output_args.get("project", "runs/detect"),
-        name=output_args.get("name", "aquavigil_v8_baseline"),
-        exist_ok=output_args.get("exist_ok", False),
-        save_period=output_args.get("save_period", -1),
-        patience=training_args.get("patience", 15),
-    )
+    results = model.train(**train_kwargs)
 
     print("\n[+] Training complete.")
-    print(f"Best weights saved at: {results.save_dir}/weights/best.pt")
+    save_dir = getattr(results, "save_dir", Path(project) / run_name)
+    print(f"Best weights saved at: {save_dir}/weights/best.pt")
+    return results
 
 
 def main():
     parser = argparse.ArgumentParser(description="Train AquaVigil YOLOv8 fish disease detection model.")
     parser.add_argument("--config", type=str, default="configs/model_config.yaml", help="Path to model configuration YAML")
     parser.add_argument("--device", type=str, default=None, help="Device override ('cpu', '0', '1', etc.)")
+    parser.add_argument("--smoke", action="store_true", help="Run a smoke test (1 epoch, fraction=0.05)")
     args = parser.parse_args()
 
-    run_training(Path(args.config), args.device)
+    run_training(Path(args.config), args.device, args.smoke)
 
 
 if __name__ == "__main__":
     main()
+

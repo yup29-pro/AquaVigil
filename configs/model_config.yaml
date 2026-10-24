@@ -7,14 +7,14 @@ model:
 
 # Dataset Settings
 data:
-  yaml_path: "dataset/raw/data.yaml"  # Path to dataset YAML configuration file
+  yaml_path: "dataset/processed/baseline_v1/data.yaml"  # Path to dataset YAML configuration file
 
 # Training Hyperparameters
 training:
   imgsz: 640                     # Input image resolution (pixels)
-  epochs: 50                     # Total training epochs (baseline recommendation: 30-50)
-  batch: 16                      # Batch size (reduce to 8 or 4 if CPU / GPU memory is constrained)
-  device: "cpu"                  # Device specification: 'cpu' or '0' (for GPU device 0)
+  epochs: 50                     # Total training epochs
+  batch: 16                      # Batch size (16 default, reduce to 8 if VRAM < 6GB)
+  device: "auto"                 # Device specification: 'auto' (cuda if available, else cpu)
   workers: 2                     # Dataloader worker count
   seed: 42                       # Random seed for reproducibility
   optimizer: "auto"              # Optimizer selection ('auto', 'SGD', 'Adam', 'AdamW')
@@ -24,7 +24,8 @@ training:
 
 # Output & Logging Settings
 output:
-  project: "runs/detect"         # Base directory where training runs are saved
-  name: "aquavigil_v8_baseline"  # Subdirectory name for current training run
+  project: "runs"                # Base directory where training runs are saved
+  name: "baseline_v1_yolov8n"    # Subdirectory name for current training run
   exist_ok: false                # Overwrite existing run directory if true, or auto-increment if false
   save_period: -1                # Save checkpoint every x epochs (-1 saves only best.pt and last.pt)
+

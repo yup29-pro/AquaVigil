@@ -134,17 +134,51 @@ python training/predict.py --weights models/best.pt --source sample_fish.jpg
 
 ---
 
-## 6. Future Integration (Phases 3 & 4)
+## 6. Run the Demo
 
-- **Backend (FastAPI)**: Serves detection endpoints at `/api/detect`.
-  ```powershell
-  uvicorn backend.app.main:app --reload
-  ```
-- **Frontend (React + TypeScript)**: Drag-and-drop fish image upload interface with interactive symptom localization and veterinary disclaimers.
+The demo combines a FastAPI backend with a mobile-first HTML/CSS/JS web interface served at `/`.
+
+### Step 1: Start the Server
+From the project root:
+```powershell
+.venv\Scripts\python -m uvicorn backend.app.main:app --host 0.0.0.0 --port 8000
+```
+Confirm `GET http://127.0.0.1:8000/health` returns `model_loaded: true`.
+
+### Step 2: Allow Inbound Traffic through Windows Firewall (Optional, for Phone Access)
+Run once in an Administrator PowerShell window:
+```powershell
+New-NetFirewallRule -DisplayName "AquaVigil Demo Port 8000" -Direction Inbound -LocalPort 8000 -Protocol TCP -Action Allow
+```
+
+### Step 3: Access via Phone on Same Wi-Fi or Hotspot
+1. Find your machine's IP address:
+   ```powershell
+   ipconfig
+   ```
+2. Open a mobile browser on any device connected to the same Wi-Fi or mobile hotspot:
+   ```text
+   http://<YOUR_PC_IP>:8000
+   ```
+   (e.g., `http://10.5.147.73:8000` or `http://192.168.137.1:8000`)
 
 ---
 
-## 7. Current Project Status
-- **Current Phase**: **Phase 1 Complete (Scaffolding & Scripts)**
-- **Next Phase**: **Phase 2 (Dataset Inspection, Verification, and Split Confirmation)**
-- **Note**: Training has not been started. Awaiting dataset placement and inspection.
+## 7. Known Limitations
+
+- **Preliminary Baseline Model**: The current weights (`models/best.pt`) are a preliminary 25-epoch baseline trained with YOLOv8n.
+- **Spot-Check Performance**: In an 11-image spot check on validation images across 5 distinct sources:
+  - `lymphocystis` and `object` were not detected.
+  - `branchitis` images also produced secondary `keratitis` boxes.
+  - `keratitis` and `Aeromoniasis` showed strong single-class symptom localization.
+- **Screening Aid Only**: AquaVigil is an AI screening aid, **not** a veterinary diagnosis tool. It cannot replace professional laboratory diagnostics or clinical examination.
+- **Restricted Taxonomy**: Healthy fish and rare disease classes were excluded in baseline v1.
+- **Validation metrics**: TBD
+
+---
+
+## 8. Current Project Status
+- **Current Phase**: **Phase 4 Baseline Demo Built and Tested**
+- **Inference Engine**: FastAPI + YOLOv8n CPU/GPU Inference with Aquaculture Knowledge Base
+- **Test Set Quarantine**: The test split remains held out and has NOT been evaluated.
+
