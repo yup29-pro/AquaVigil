@@ -37,10 +37,11 @@ dataset/processed/baseline_v1/test/
 *.7z
 
 # Model weights and checkpoints
-models/*.pt
-models/*.onnx
-models/*.engine
+*.pt
+*.onnx
+*.engine
 !models/.gitkeep
+!models/best.pt
 
 # Training runs & logs
 runs/
