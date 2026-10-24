@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AquaVigil - Fish Health Screening Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #070d17;
+      --card-bg: rgba(15, 23, 42, 0.75);
+      --card-border: rgba(56, 189, 248, 0.15);
+      --accent-cyan: #06b6d4;
+      --accent-teal: #14b8a6;
+      --accent-blue: #3b82f6;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: radial-gradient(circle at 50% 0%, #0d2137 0%, #070d17 70%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px 12px 40px;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 580px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      padding: 12px 8px 6px;
+    }
+
+    .brand-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(6, 182, 212, 0.12);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      color: #67e8f9;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 8px;
+    }
+
+    .brand-badge::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #22d3ee;
+      box-shadow: 0 0 8px #22d3ee;
+    }
+
+    h1 {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff 40%, #7dd3fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Disclaimer Card */
+    .disclaimer-card {
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      border-radius: var(--radius-md);
+      padding: 10px 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 12px;
+      color: #fde68a;
+      line-height: 1.45;
+    }
+
+    .disclaimer-icon {
+      flex-shrink: 0;
+      font-size: 15px;
+      margin-top: 1px;
+    }
+
+    /* Main Glass Card */
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    /* Upload Area */
+    .upload-zone {
+      border: 2px dashed rgba(56, 189, 248, 0.3);
+      border-radius: var(--radius-md);
+      padding: 24px 16px;
+      text-align: center;
+      background: rgba(8, 20, 39, 0.5);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      position: relative;
+    }
+
+    .upload-zone:hover, .upload-zone.dragover {
+      border-color: #38bdf8;
+      background: rgba(14, 116, 144, 0.15);
+    }
+
+    .upload-zone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .upload-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(6, 182, 212, 0.15);
+      color: #38bdf8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+      font-size: 20px;
+    }
+
+    .upload-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #f8fafc;
+      margin-bottom: 4px;
+    }
+
+    .upload-hint {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    /* Controls */
+    .controls-row {
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .conf-slider-box {
+      flex: 1;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .conf-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .conf-slider-box input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent-cyan);
+      height: 4px;
+      cursor: pointer;
+    }
+
+    .btn-submit {
+      flex: 1;
+      height: 46px;
+      border: none;
+      background: linear-gradient(135deg, #06b6d4, #0284c7);
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 700;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 14px rgba(6, 182, 212, 0.35);
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      filter: brightness(1.1);
+      transform: translateY(-1px);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    /* Loading Spinner */
+    .spinner {
+      display: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #ffffff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Result Section */
+    .result-section {
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .preview-box {
+      width: 100%;
+      background: #020617;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    .preview-box img {
+      width: 100%;
+      height: auto;
+      max-height: 420px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .meta-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      padding: 0 4px;
+    }
+
+    .stat-pill {
+      background: rgba(255, 255, 255, 0.06);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 600;
+      color: #38bdf8;
+    }
+
+    /* Detection list & Cards */
+    .detections-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .detection-card {
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .detection-card.non-disease {
+      border-color: rgba(148, 163, 184, 0.25);
+    }
+
+    .det-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .det-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .det-badge {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    .badge-disease {
+      background: rgba(244, 63, 94, 0.2);
+      color: #fda4af;
+      border: 1px solid rgba(244, 63, 94, 0.4);
+    }
+
+    .badge-ref {
+      background: rgba(148, 163, 184, 0.15);
+      color: #cbd5e1;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+    }
+
+    .det-conf {
+      font-size: 13px;
+      font-weight: 800;
+      color: #38bdf8;
+    }
+
+    .kb-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    .kb-block {
+      background: rgba(2, 6, 23, 0.4);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      margin-top: 4px;
+    }
+
+    .kb-block-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #94a3b8;
+      margin-bottom: 4px;
+    }
+
+    .kb-list {
+      list-style-type: none;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .kb-list li {
+      font-size: 11.5px;
+      color: #cbd5e1;
+      line-height: 1.4;
+      padding-left: 12px;
+      position: relative;
+    }
+
+    .kb-list li::before {
+      content: '•';
+      position: absolute;
+      left: 2px;
+      color: var(--accent-cyan);
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 24px 16px;
+      background: rgba(15, 23, 42, 0.5);
+      border-radius: var(--radius-md);
+      border: 1px dashed rgba(148, 163, 184, 0.2);
+    }
+
+    .empty-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #34d399;
+      margin-bottom: 4px;
+    }
+
+    .empty-desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* Error Toast */
+    .error-toast {
+      display: none;
+      background: rgba(244, 63, 94, 0.15);
+      border: 1px solid rgba(244, 63, 94, 0.35);
+      color: #fecdd3;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 12.5px;
+      line-height: 1.4;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <header>
+      <div class="brand-badge">AquaVigil Edge AI</div>
+      <h1>Fish Health Screening</h1>
+      <p class="subtitle">Real-time symptom detection & aquaculture biosurveillance</p>
+    </header>
+
+    <!-- Visible Medical Disclaimer -->
+    <div class="disclaimer-card" id="disclaimerCard">
+      <div class="disclaimer-icon">⚠️</div>
+      <div>
+        <strong>Notice:</strong> AI screening aid only. Not a veterinary diagnosis. Confirm any visual findings with an aquatic animal health professional.
+      </div>
+    </div>
+
+    <!-- Upload Card -->
+    <div class="card">
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="fileInput" accept="image/*" capture="environment">
+        <div class="upload-icon">📷</div>
+        <div class="upload-title" id="uploadLabel">Take Photo or Upload Image</div>
+        <div class="upload-hint">Supports JPEG, PNG, WEBP (tap or drag & drop)</div>
+      </div>
+
+      <div class="controls-row">
+        <div class="conf-slider-box">
+          <div class="conf-header">
+            <span>Confidence Threshold</span>
+            <span id="confDisplay">25%</span>
+          </div>
+          <input type="range" id="confSlider" min="0.05" max="0.80" step="0.05" value="0.25">
+        </div>
+        <button class="btn-submit" id="btnSubmit" disabled>
+          <span class="spinner" id="btnSpinner"></span>
+          <span id="btnText">Analyze Fish</span>
+        </button>
+      </div>
+
+      <div class="error-toast" id="errorToast"></div>
+    </div>
+
+    <!-- Results Card -->
+    <div class="result-section" id="resultSection">
+      <div class="meta-bar">
+        <span>Inference Time: <span class="stat-pill" id="latencyStat">0 ms</span></span>
+        <span>Detections: <span class="stat-pill" id="countStat">0</span></span>
+      </div>
+
+      <div class="preview-box">
+        <img id="annotatedImage" alt="Annotated Fish Health Screening">
+      </div>
+
+      <div class="detections-container" id="detectionsList">
+        <!-- Dynamic Detections or Empty State -->
+      </div>
+    </div>
+
+    <footer>
+      AquaVigil v1.0 • YOLOv8n Multi-Class Vision Pipeline
+    </footer>
+  </div>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const uploadZone = document.getElementById('uploadZone');
+    const uploadLabel = document.getElementById('uploadLabel');
+    const confSlider = document.getElementById('confSlider');
+    const confDisplay = document.getElementById('confDisplay');
+    const btnSubmit = document.getElementById('btnSubmit');
+    const btnSpinner = document.getElementById('btnSpinner');
+    const btnText = document.getElementById('btnText');
+    const errorToast = document.getElementById('errorToast');
+    const resultSection = document.getElementById('resultSection');
+    const annotatedImage = document.getElementById('annotatedImage');
+    const latencyStat = document.getElementById('latencyStat');
+    const countStat = document.getElementById('countStat');
+    const detectionsList = document.getElementById('detectionsList');
+
+    let selectedFile = null;
+
+    // Confidence Slider Update
+    confSlider.addEventListener('input', (e) => {
+      const val = Math.round(e.target.value * 100);
+      confDisplay.textContent = val + '%';
+    });
+
+    // File Selection
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        handleFile(e.target.files[0]);
+      }
+    });
+
+    // Drag and Drop
+    ['dragenter', 'dragover'].forEach(event => {
+      uploadZone.addEventListener(event, (e) => {
+        e.preventDefault();
+        uploadZone.classList.add('dragover');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(event => {
+      uploadZone.addEventListener(event, (e) => {
+        e.preventDefault();
+        uploadZone.classList.remove('dragover');
+      });
+    });
+
+    uploadZone.addEventListener('drop', (e) => {
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        handleFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    function handleFile(file) {
+      if (!file.type.startsWith('image/')) {
+        showError('Please select a valid image file (JPEG, PNG, etc).');
+        return;
+      }
+      hideError();
+      selectedFile = file;
+      uploadLabel.textContent = file.name;
+      btnSubmit.removeAttribute('disabled');
+    }
+
+    function showError(msg) {
+      errorToast.textContent = msg;
+      errorToast.style.display = 'block';
+    }
+
+    function hideError() {
+      errorToast.style.display = 'none';
+      errorToast.textContent = '';
+    }
+
+    // Submit Inference Request
+    btnSubmit.addEventListener('click', async () => {
+      if (!selectedFile) return;
+
+      hideError();
+      btnSubmit.setAttribute('disabled', 'true');
+      btnSpinner.style.display = 'inline-block';
+      btnText.textContent = 'Screening...';
+
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('conf', confSlider.value);
+
+      try {
+        const response = await fetch('/predict', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.detail || `Server error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        renderResults(data);
+      } catch (err) {
+        showError(err.message || 'Failed to process image. Check network and server logs.');
+      } finally {
+        btnSpinner.style.display = 'none';
+        btnText.textContent = 'Analyze Fish';
+        btnSubmit.removeAttribute('disabled');
+      }
+    });
+
+    function renderResults(data) {
+      annotatedImage.src = data.annotated_image;
+      latencyStat.textContent = `${data.inference_ms} ms`;
+      countStat.textContent = data.count;
+
+      detectionsList.innerHTML = '';
+
+      if (!data.detections || data.detections.length === 0) {
+        detectionsList.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-title">✓ No disease regions detected</div>
+            <div class="empty-desc">
+              No symptomatic features were identified above the confidence threshold (${data.confidence_threshold * 100}%).
+              Continue regular water monitoring and biosurveillance.
+            </div>
+          </div>
+        `;
+      } else {
+        data.detections.forEach((det) => {
+          const kb = det.knowledge || {};
+          const isDisease = kb.is_disease !== false;
+          const badgeClass = isDisease ? 'badge-disease' : 'badge-ref';
+          const badgeText = isDisease ? 'Symptom' : 'Reference';
+          const cardClass = isDisease ? '' : 'non-disease';
+
+          const visibleSignsHtml = kb.visible_signs && kb.visible_signs.length ? `
+            <div class="kb-block">
+              <div class="kb-block-title">Typical Visual Indicators:</div>
+              <ul class="kb-list">
+                ${kb.visible_signs.map(s => `<li>${escapeHtml(s)}</li>`).join('')}
+              </ul>
+            </div>
+          ` : '';
+
+          const guidanceHtml = kb.general_guidance && kb.general_guidance.length ? `
+            <div class="kb-block">
+              <div class="kb-block-title">Suggested Biosecurity Actions:</div>
+              <ul class="kb-list">
+                ${kb.general_guidance.map(g => `<li>${escapeHtml(g)}</li>`).join('')}
+              </ul>
+            </div>
+          ` : '';
+
+          const card = document.createElement('div');
+          card.className = `detection-card ${cardClass}`;
+          card.innerHTML = `
+            <div class="det-top">
+              <div class="det-name">
+                <span>${escapeHtml(kb.name || det.class)}</span>
+                <span class="det-badge ${badgeClass}">${badgeText}</span>
+              </div>
+              <div class="det-conf">${det.confidence_pct}%</div>
+            </div>
+            ${kb.description ? `<p class="kb-desc">${escapeHtml(kb.description)}</p>` : ''}
+            ${visibleSignsHtml}
+            ${guidanceHtml}
+          `;
+          detectionsList.appendChild(card);
+        });
+      }
+
+      resultSection.style.display = 'flex';
+      resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+  </script>
+</body>
+</html>
